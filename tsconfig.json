@@ -32,7 +32,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "src/app/lib/placeholder-data.ts",
+    "src/lib/placeholder-data.ts",
     "scripts/seed.js",
     ".next/dev/types/**/*.ts"
   ],

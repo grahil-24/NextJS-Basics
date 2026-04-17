@@ -7,10 +7,12 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@neondatabase/serverless": "^1.0.2",
     "@tailwindcss/forms": "^0.5.10",
     "autoprefixer": "10.4.20",
     "bcrypt": "^5.1.1",
     "clsx": "^2.1.1",
+    "drizzle-orm": "^0.45.2",
     "next": "latest",
     "next-auth": "5.0.0-beta.25",
     "postcss": "8.5.1",
@@ -26,7 +28,8 @@
     "@types/bcrypt": "^5.0.2",
     "@types/node": "22.10.7",
     "@types/react": "19.0.7",
-    "@types/react-dom": "19.0.3"
+    "@types/react-dom": "19.0.3",
+    "drizzle-kit": "^0.31.10"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
