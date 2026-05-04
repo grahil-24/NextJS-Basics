@@ -210,9 +210,9 @@ export async function fetchCustomers() {
     //   ORDER BY name ASC
     // `;
 
-    const customerData = await db.select({id: customers.id, name: customers.name}).from(customers).orderBy(customers.name);
+    const customerData: CustomerField[] = await db.select({id: customers.id, name: customers.name}).from(customers).orderBy(customers.name);
 
-    return customers;
+    return customerData;
   } catch (err) {
     console.error('Database Error:', err);
     throw new Error('Failed to fetch all customers.');
