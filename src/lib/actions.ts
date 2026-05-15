@@ -27,7 +27,7 @@ export async function createInvoice(formData: FormData){
     const amountInCents = amount * 100;
     const date = new Date().toISOString().split('T')[0];
 
-    await db.insert(invoices).values({customer_id: customerId, amount, status, date});
+    await db.insert(invoices).values({customer_id: customerId, amount: amountInCents, status, date});
 
     revalidatePath('/dashboard/invoices');
     redirect('/dashboard/invoices');
@@ -35,7 +35,7 @@ export async function createInvoice(formData: FormData){
 
 const EditSchema = FormSchema.omit({date: true, id: true});
 
-export async function updateInvoice(formData: FormData, id: string){
+export async function updateInvoice(id: string, formData: FormData){
     const {customerId, amount, status} = EditSchema.parse({
         customerId: formData.get('customerId'),
         amount: formData.get('amount'),
@@ -44,7 +44,7 @@ export async function updateInvoice(formData: FormData, id: string){
 
     const amountInCents = amount * 100;
 
-    await db.update(invoices).set({customer_id: customerId, amount, status}).where(eq(invoices.id, id));
+    await db.update(invoices).set({customer_id: customerId, amount: amountInCents, status}).where(eq(invoices.id, id));
     revalidatePath('/dashboard/invoices');
     redirect('/dashboard/invoices');
 }

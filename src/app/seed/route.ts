@@ -38,7 +38,12 @@ async function seedInvoices() {
   //   ),
   // );
 
-  const insertedInvoices = await db.insert(invoices).values(invoices_pd).onConflictDoNothing();
+  const insertedInvoices = await db.insert(invoices).values(
+    invoices_pd.map((invoice) => ({
+      ...invoice,
+      status: invoice.status as 'pending' | 'paid', 
+    }))
+  ).onConflictDoNothing();
 
   return insertedInvoices;
 }
