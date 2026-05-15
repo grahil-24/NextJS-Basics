@@ -1,5 +1,7 @@
 import { sql } from "drizzle-orm";
-import { uuid, text, varchar, pgTable, integer, PgUUID, date } from "drizzle-orm/pg-core";
+import { uuid, text, varchar, pgTable, integer, PgUUID, date, pgEnum } from "drizzle-orm/pg-core";
+
+const statusEnum = pgEnum('status', ['paid', 'pending']);
 
 export const users = pgTable('users', {
     id: uuid().primaryKey().default(sql`gen_random_uuid()`),
@@ -24,6 +26,6 @@ export const invoices = pgTable('invoices', {
     id: uuid().primaryKey().default(sql`gen_random_uuid()`),
     customer_id: uuid().notNull(),
     amount: integer().notNull(),
-    status: varchar({length: 255}).notNull(),
+    status: statusEnum().notNull(),
     date: date().notNull()
 })

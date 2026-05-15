@@ -2,6 +2,7 @@
 
 import { db } from '@/db/drizzle';
 import { invoices } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import z from 'zod';
@@ -28,6 +29,22 @@ export async function createInvoice(formData: FormData){
 
     await db.insert(invoices).values({customer_id: customerId, amount, status, date});
 
+    revalidatePath('/dashboard/invoices');
+    redirect('/dashboard/invoices');
+}
+
+const EditSchema = FormSchema.omit({date: true, id: true});
+
+export async function updateInvoice(formData: FormData, id: string){
+    const {customerId, amount, status} = EditSchema.parse({
+        customerId: formData.get('customerId'),
+        amount: formData.get('amount'),
+        status: formData.get('status')
+    });
+
+    const amountInCents = amount * 100;
+
+    await db.update(invoices).set({customer_id: customerId, amount, status}).where(eq(invoices.id, id));
     revalidatePath('/dashboard/invoices');
     redirect('/dashboard/invoices');
 }

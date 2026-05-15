@@ -8,6 +8,13 @@
       "when": 1776406044086,
       "tag": "0000_cooing_the_captain",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1777965087444,
+      "tag": "0001_spooky_mysterio",
+      "breakpoints": true
     }
   ]
 }
