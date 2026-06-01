@@ -1,7 +1,7 @@
 'use client'
 
 //reset is used to reset the current error boundary. when executed, will try to rerender the current route segment
-export default async function Error ({error, reset}: {error: Error | {digest ?: string}, reset: ()  => void}){
+export default function Error ({error, reset}: {error: Error & {digest ?: string}, reset: ()  => void}){
 
     return (
         <main className="flex h-full flex-col items-center justify-center">
