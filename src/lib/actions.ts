@@ -61,19 +61,26 @@ export async function createInvoice(prevState: State, formData: FormData){
 
 const EditSchema = FormSchema.omit({date: true, id: true});
 
-export async function updateInvoice(id: string, formData: FormData){
-    const {customerId, amount, status} = EditSchema.parse({
+export async function updateInvoice(id: string, prevState: State, formData: FormData){
+    const validatedFields = EditSchema.safeParse({
         customerId: formData.get('customerId'),
         amount: formData.get('amount'),
         status: formData.get('status')
     });
 
+    if(!validatedFields.success){
+        return {
+            errors: validatedFields.error.flatten().fieldErrors,
+            message: 'Missing fields. Failed to update invoice'
+        }
+    }
+
+    const {customerId, amount, status} = validatedFields.data;
     const amountInCents = amount * 100;
 
     try {
         await db.update(invoices).set({customer_id: customerId, amount: amountInCents, status}).where(eq(invoices.id, id));
     }catch(error){
-        console.log("error in updating invoice: ", error);
         return {
             message: 'Database error: Failed to update invoice'
         }
@@ -83,7 +90,7 @@ export async function updateInvoice(id: string, formData: FormData){
 }
 
 export async function deleteInvoiceWithId(id: string){
-    throw Error("Error deleting invoice! Try again");
+    // throw Error("Error deleting invoice! Try again");
     try {
         await db.delete(invoices).where(eq(invoices.id, id));
     }catch(error){
