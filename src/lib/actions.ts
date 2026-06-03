@@ -1,8 +1,10 @@
 'use server';
 
+import { signIn } from '@/auth';
 import { db } from '@/db/drizzle';
 import { invoices } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { AuthError, CredentialsSignin } from 'next-auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import z from 'zod';
@@ -102,4 +104,21 @@ export async function deleteInvoiceWithId(id: string){
         throw new Error('Failed to delete invoice');
     }
     revalidatePath("/dashboard/invoices");
+}
+
+export async function authenticate(prevState: string | undefined, formData: FormData){
+    try {
+        await signIn('credentials', formData);
+    }catch(error){
+        if(error instanceof AuthError){
+            switch(error.type){
+                case 'CredentialsSignin':
+                    return 'Invalid credentials'
+                default: 
+                    return 'Something went wrong'
+            }
+        }else{
+            throw error;
+        }
+    }
 }
