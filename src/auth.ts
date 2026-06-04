@@ -13,7 +13,6 @@ const getUser = async(email: string): Promise<User | undefined> => {
         const user: User[] = await db.select().from(users).where(eq(users.email, email));
         return user[0];
     }catch(error){
-        console.log("error fetching user ", error);
         throw new Error('Failed to fetch user');
     }
 }

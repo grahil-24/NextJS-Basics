@@ -82,7 +82,6 @@ export async function createInvoice(prevState: State, formData: FormData){
     try {
         await db.insert(invoices).values({customer_id: customerId, amount: amountInCents, status, date});
     }catch(error){
-        console.log("error in creating invoice: ", error);
         return {
             message: 'Database error: Failed to create invoice'
         }
@@ -126,7 +125,6 @@ export async function deleteInvoiceWithId(id: string){
     try {
         await db.delete(invoices).where(eq(invoices.id, id));
     }catch(error){
-        console.log("error in delete invoice: ", error);
         // return {
         //     message: 'Database error: Failed to delete invoice'
         // }
@@ -155,7 +153,6 @@ export async function authenticate(prevState: string | undefined, formData: Form
 
 export async function signUp(prevState: SignupState | undefined, formData: FormData){
     try {
-        console.log("formData ", formData);
         const validatedFields = SignupFormSchema.safeParse({
             email: formData.get('email'),
             name: formData.get('name'),
@@ -163,7 +160,6 @@ export async function signUp(prevState: SignupState | undefined, formData: FormD
             confirmPassword: formData.get('confirmPassword'),
             redirectTo: formData.get('redirectTo')
         });
-        console.log("validatedFields ",validatedFields.error);
         if(!validatedFields.success){
             return {
                 errors: validatedFields.error.flatten().fieldErrors,
