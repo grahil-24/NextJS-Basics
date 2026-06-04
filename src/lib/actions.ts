@@ -2,12 +2,13 @@
 
 import { signIn } from '@/auth';
 import { db } from '@/db/drizzle';
-import { invoices } from '@/db/schema';
+import { invoices, users } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { AuthError, CredentialsSignin } from 'next-auth';
+import { AuthError } from 'next-auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import z from 'zod';
+import bcrypt from 'bcrypt';
 
 const FormSchema = z.object({
     customerId: z.string({
@@ -21,6 +22,25 @@ const FormSchema = z.object({
     id: z.string()
 })
 
+const SignupFormSchema = z.object({
+    email: z.string().email({message: 'Invalid email format'}),
+    name: z.string().min(3),
+    password: z.string().min(5)
+        .regex(/^(?=.*[A-Z])(?=.*\d).+$/, {
+            message: 'Password must include at least one uppercase letter and one number',
+            }),
+    confirmPassword: z.string().min(5),
+    redirectTo: z.string()
+}).superRefine(({confirmPassword, password}, ctx) => {
+    if(confirmPassword !== password){
+        ctx.addIssue({
+            code: "custom",
+            message: "The passwords did not match",
+            path: ['confirmPassword']
+        })
+    }
+})
+
 const CreateInvoice = FormSchema.omit({id: true, date: true})
 
 export type State = {
@@ -31,6 +51,16 @@ export type State = {
   };
   message?: string | null;
 };
+
+export type SignupState = {
+    errors?: {
+        email?: string[];
+        password?: string[];
+        confirmPassword?: string[];
+        name?: string[]
+    };
+    message?: string | null
+}
 
 export async function createInvoice(prevState: State, formData: FormData){
     const validatedFields = CreateInvoice.safeParse({
@@ -117,6 +147,43 @@ export async function authenticate(prevState: string | undefined, formData: Form
                 default: 
                     return 'Something went wrong'
             }
+        }else{
+            throw error;
+        }
+    }
+}
+
+export async function signUp(prevState: SignupState | undefined, formData: FormData){
+    try {
+        console.log("formData ", formData);
+        const validatedFields = SignupFormSchema.safeParse({
+            email: formData.get('email'),
+            name: formData.get('name'),
+            password: formData.get('password'),
+            confirmPassword: formData.get('confirmPassword'),
+            redirectTo: formData.get('redirectTo')
+        });
+        console.log("validatedFields ",validatedFields.error);
+        if(!validatedFields.success){
+            return {
+                errors: validatedFields.error.flatten().fieldErrors,
+                message: 'Invalid fields, failed to create user'
+            }
+        }
+        const {password, email, name, redirectTo} = validatedFields.data;
+        const hashedPassword = await bcrypt.hash(password, 10);
+        await db.insert(users).values({password: hashedPassword, email, name});
+        await signIn('credentials', {email, password, redirectTo});
+    }catch(error: any){
+        if(error instanceof AuthError){
+            switch(error.type){
+                case 'CredentialsSignin':
+                    return { message: 'Invalid credentials' }
+                default: 
+                    return { message: 'Something went wrong' }
+            }
+        }else if(error.cause?.code === '23505'){
+            return { message: 'User with the email already exists' }
         }else{
             throw error;
         }

@@ -11,12 +11,24 @@ import { Button } from './button';
 import { useActionState } from 'react';
 import { authenticate } from '@/lib/actions';
 import { useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { useCallback } from 'react';
 
 export default function LoginForm() {
 
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/dashboard';
   const [errorMessage, formAction, isPending] = useActionState(authenticate, undefined);
+
+  const createQueryString = useCallback(
+    (name: string, value: string) => {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set(name, value)
+ 
+      return params.toString()
+    },
+    [searchParams]
+  )
 
   return (
     <form action={formAction} className="space-y-3">
@@ -77,6 +89,9 @@ export default function LoginForm() {
             </>
           )}
         </div>
+      <Link href={'/sign-up?' + createQueryString('callbackUrl', callbackUrl)}>
+        <p className='text-sm hover:cursor-pointer hover:text-blue-400 transition-colors duration-200'>Dont have an account? Sign up</p>
+      </Link>
       </div>
     </form>
   );
